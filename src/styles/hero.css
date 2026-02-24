@@ -1,0 +1,207 @@
+/* =============================================
+   Hero Section - Pure CSS Responsive Version
+   ============================================= */
+
+.hero-section {
+    position: relative;
+    width: 100%;
+    min-height: 85vh;
+    /* mobile friendly height */
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 5rem;
+    /* space for fixed navbar on mobile */
+    padding-bottom: 3rem;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+}
+
+/* Background Image & Overlays */
+.hero-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+.hero-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 60% center;
+    /* Mobile: shifted slightly left to show more product */
+    transition: object-position 0.7s ease, transform 0.7s ease;
+}
+
+.hero-bg::after {
+    content: '';
+
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    /* dark overlay mobile/tablet */
+    transition: background 0.7s ease;
+}
+
+.hero-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, black, rgba(0, 0, 0, 0.6), transparent);
+    opacity: 0;
+    transition: opacity 0.7s ease;
+}
+
+/* Content Container */
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 1400px;
+    width: 100%;
+    padding: 0 1.5rem;
+    text-align: center;
+}
+
+.hero-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+}
+
+.hero-content h1 span {
+    background: linear-gradient(to right, #d4a017, #b5892e, #5c3a0f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-content p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: rgba(229, 229, 229, 0.9);
+    max-width: 500px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.6;
+}
+
+.hero-cta {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    padding: 0.7rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    text-decoration: none;
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(184, 137, 46, 0.3);
+    cursor: pointer;
+    border: none;
+}
+
+.hero-cta::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, #b5892e, #704d12);
+    transition: filter 0.3s ease;
+    z-index: -1;
+}
+
+.hero-cta:hover::before {
+    filter: brightness(1.15);
+}
+
+/* =============================================
+   Responsive Adjustments
+   ============================================= */
+
+/* Tablets (md ~ 768px+) */
+@media (min-width: 768px) {
+    .hero-section {
+        min-height: 100vh;
+        padding-top: 6rem;
+        padding-bottom: 0;
+    }
+
+    .hero-bg img {
+        object-position: 65% center;
+        /* slight right shift */
+    }
+
+    .hero-bg::after {
+        background: rgba(0, 0, 0, 0.45);
+        /* lighter overlay */
+    }
+
+    .hero-content {
+        text-align: left;
+        padding-left: 3rem;
+    }
+
+    .hero-content h1 {
+        font-size: 4rem;
+    }
+
+    .hero-content p {
+        font-size: 1.3rem;
+        max-width: 520px;
+        margin-left: 0;
+    }
+}
+
+/* iPad Pro & larger tablets/laptops (lg ~ 1024px+) */
+@media (min-width: 1024px) {
+    .hero-bg img {
+        object-position: 62% center;
+        /* more right shift for iPad Pro */
+    }
+
+    .hero-bg::after {
+        background: rgba(0, 0, 0, 0.3);
+    }
+
+    .hero-bg::before {
+        opacity: 1;
+        /* enable left gradient */
+    }
+
+    .hero-content {
+        padding-left: 8.5rem;
+        padding-right: 2rem;
+    }
+
+    .hero-content h1 {
+        font-size: 4.5rem;
+        max-width: 720px;
+    }
+
+    .hero-content p {
+        font-size: 1.5rem;
+        max-width: 620px;
+    }
+
+    .hero-cta {
+        font-size: 1.1rem;
+        padding: 0.85rem 2.5rem;
+    }
+}
+
+/* Full Desktop / Very Wide (xl ~ 1280px+) */
+@media (min-width: 1280px) {
+    .hero-bg img {
+        object-position: right center;
+        /* pinned to right */
+        transform: translateX(4%);
+        /* subtle extra push if needed */
+    }
+
+    .hero-content {
+        padding-left: 10%;
+    }
+
+    .hero-content h1 {
+        font-size: 5rem;
+    }
+}
