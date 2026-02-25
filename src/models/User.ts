@@ -38,7 +38,7 @@ const userSchema = new Schema<IUser>(
             sparse: true,
             lowercase: true,
             validate: {
-                validator: function (this: IUser, value: string) {
+                validator: function (this: any, value: string) {
                     return !this.phone || !!value;
                 },
                 message: "Email or phone is required",
@@ -49,7 +49,7 @@ const userSchema = new Schema<IUser>(
             unique: true,
             sparse: true,
             validate: {
-                validator: function (this: IUser, value: string) {
+                validator: function (this: any, value: string) {
                     return !this.email || !!value;
                 },
                 message: "Email or phone is required",
