@@ -181,22 +181,22 @@ export default function ContactPage() {
             </section>
 
             {/* Map Section */}
-            <section className="container mx-auto px-6 lg:px-[139px] mb-24">
+            {/* <section className="container mx-auto px-6 lg:px-[139px] mb-24">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     whileInView={{ opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.8 }}
                     className="w-full h-[300px] md:h-[400px] lg:h-[500px] rounded-[25px] overflow-hidden border border-[#a87522]/30 relative group"
-                >
-                    {/* <img
+                > */}
+            {/* <img
                         src={typeof imgMap === 'string' ? imgMap : imgMap.src}
                         alt="Location Map"
                         className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
                     /> */}
 
-                    {/* Map Pin Overlay Animation */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            {/* Map Pin Overlay Animation */}
+            {/* <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
                         <motion.div
                             initial={{ y: -20, opacity: 0 }}
                             whileInView={{ y: 0, opacity: 1 }}
@@ -206,7 +206,7 @@ export default function ContactPage() {
                         </motion.div>
                     </div>
                 </motion.div>
-            </section>
+            </section> */}
 
         </div>
     );
