@@ -474,7 +474,7 @@ export default function CheckoutPage() {
                                                 Cash on Delivery (COD)
                                             </span>
                                         </label>
-                                        <label className="flex items-center p-3 bg-black/40 border border-[#3a3027] rounded-lg cursor-pointer hover:border-[#a87522]/50 transition-colors opacity-50">
+                                        {/* <label className="flex items-center p-3 bg-black/40 border border-[#3a3027] rounded-lg cursor-pointer hover:border-[#a87522]/50 transition-colors opacity-50">
                                             <input
                                                 type="radio"
                                                 name="paymentMethod"
@@ -485,7 +485,7 @@ export default function CheckoutPage() {
                                             <span className="ml-3 text-gray-400 font-medium">
                                                 Online Payment (Coming Soon)
                                             </span>
-                                        </label>
+                                        </label> */}
                                     </div>
                                 </div>
 
