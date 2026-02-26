@@ -41,7 +41,6 @@ export const Footer = () => {
             <Link href="/returns" className="text-[14px] md:text-[16px] text-[#e5e5e5]/75 hover:text-white transition-colors">Return Policy</Link>
             <Link href="/privacy" className="text-[14px] md:text-[16px] text-[#e5e5e5]/75 hover:text-white transition-colors">Privacy Policy</Link>
             <Link href="/terms" className="text-[14px] md:text-[16px] text-[#e5e5e5]/75 hover:text-white transition-colors">Terms & Conditions</Link>
-            <Link href="/track" className="text-[14px] md:text-[16px] text-[#e5e5e5]/75 hover:text-white transition-colors">Track Order</Link>
           </div>
         </div>
 
