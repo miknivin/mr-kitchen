@@ -24,18 +24,34 @@ export default function CheckoutPage() {
     const [checkoutItems, setCheckoutItems] = useState<any[]>([]);
     const [isBuyNow, setIsBuyNow] = useState(false);
     const [isItemsLoaded, setIsItemsLoaded] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
 
     // Form state
     const [formData, setFormData] = useState({
-        fullName: user?.name || '',
-        email: user?.email || '',
+        fullName: '',
+        email: '',
         phone: '',
         street: '',
         city: '',
         postalCode: '',
         message: '',
     });
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    // Update form data when user profile loads
+    useEffect(() => {
+        if (userProfile || user) {
+            setFormData(prev => ({
+                ...prev,
+                fullName: prev.fullName || userProfile?.name || user?.name || '',
+                email: prev.email || userProfile?.email || user?.email || '',
+            }));
+        }
+    }, [userProfile, user]);
 
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [paymentMethod, setPaymentMethod] = useState('cod'); // COD or online
@@ -60,14 +76,23 @@ export default function CheckoutPage() {
     }, [cartItems]);
 
     useEffect(() => {
-        // Wait for items to be loaded from storage/cart
-        if (!isItemsLoaded || isSubmitted) return;
+        // Wait for items to be loaded from storage/cart and client to mount
+        if (!isMounted || !isItemsLoaded || isSubmitted) return;
 
         // If cart is empty and no buy now item, redirect to products
         const hasItems = checkoutItems.length > 0;
+
+        // Only redirect if we've had a chance to load items and we're sure it's empty
+        // We add a small delay to authLoading check to ensure state is stable
         if (!hasItems && !isLoading && !authLoading) {
-            toast.error('Your cart is empty');
-            setTimeout(() => router.push('/products'), 2000);
+            const timeoutId = setTimeout(() => {
+                // Re-check hasItems in case they loaded during the timeout
+                if (checkoutItems.length === 0) {
+                    toast.error('Your cart is empty');
+                    router.push('/products');
+                }
+            }, 500);
+            return () => clearTimeout(timeoutId);
         }
 
         // If user is not authenticated, show auth modal
@@ -75,7 +100,7 @@ export default function CheckoutPage() {
             toast.error('Please sign in to proceed');
             openAuthModal('/checkout');
         }
-    }, [checkoutItems.length, router, isLoading, authLoading, userProfile, user, openAuthModal]);
+    }, [isMounted, isItemsLoaded, checkoutItems.length, router, isLoading, authLoading, userProfile, user, openAuthModal]);
 
     // Calculate totals
     const subtotal = checkoutItems.reduce((acc, item) => acc + item.price * item.quantity, 0);

@@ -82,12 +82,6 @@ export default function ProductDetailsPage() {
             return;
         }
 
-        if (!user) {
-            toast.error('Please login to proceed to checkout');
-            openAuthModal('/checkout');
-            return;
-        }
-
         const displayPrice = selectedVariant
             ? (selectedVariant.discountPrice > 0 ? selectedVariant.discountPrice : selectedVariant.price)
             : product.price;
@@ -107,6 +101,13 @@ export default function ProductDetailsPage() {
 
         // Use sessionStorage instead of Redux cart for Buy Now
         sessionStorage.setItem('buyNowItem', JSON.stringify(buyNowItem));
+
+        if (!user) {
+            toast.error('Please login to proceed to checkout');
+            openAuthModal('/checkout');
+            return;
+        }
+
         router.push('/checkout');
     };
 
@@ -220,11 +221,11 @@ export default function ProductDetailsPage() {
                         {/* Header Info */}
                         <div>
                             {/* Category Badge */}
-                            <div className="mb-4">
+                            {/* <div className="mb-4">
                                 <span className="inline-block px-4 py-1 bg-[#a87522]/10 border border-[#a87522]/30 text-[#a87522] text-sm font-['Poppins'] rounded-full">
                                     {product.category || 'Product'}
                                 </span>
-                            </div>
+                            </div> */}
 
                             {/* Product Name */}
                             <h1 className="font-['Poppins'] font-bold text-[32px] md:text-[42px] text-white mb-4 leading-tight">
