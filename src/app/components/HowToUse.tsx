@@ -1,7 +1,7 @@
 'use client';
 import React, { useCallback, useState, useEffect } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import imgApply from "../../assets/419f8e2ca2119256a91efcaca73ebfd464481ea4.png";
+import imgApply from "../../assets/Rectangle 9.png";
 import imgScrub from "../../assets/0a15bd30151a4d08d55da10c27bd329d5f8cb036.png";
 import imgRinse from "../../assets/031f680ac5cb9e42b293489f81c9e1791b17577e.png";
 import { Reveal } from './Reveal';
