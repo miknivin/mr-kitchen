@@ -20,15 +20,17 @@ export default function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
+    const isMaintenance = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
+
     return (
         <html lang="en">
             <body className="min-h-screen bg-black text-[#e5e5e5] overflow-x-hidden font-['Poppins']">
                 <ReduxProvider>
                     <AuthModalProvider>
                         <Toaster richColors position="top-right" theme="dark" duration={2000} />
-                        <Header />
+                        {!isMaintenance && <Header />}
                         <main>{children}</main>
-                        <Footer />
+                        {!isMaintenance && <Footer />}
                     </AuthModalProvider>
                 </ReduxProvider>
             </body>
