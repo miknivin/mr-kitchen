@@ -12,6 +12,8 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { useAuthModal } from '@/context/AuthModalContext';
 import { useGetMeQuery } from '@/redux/api/userApi';
+import Script from 'next/script';
+
 
 export default function CheckoutPage() {
     const router = useRouter();
@@ -180,7 +182,7 @@ export default function CheckoutPage() {
                     city: formData.city,
                     phoneNo: formData.phone,
                     zipCode: formData.postalCode,
-                    country: "India", // Default or you could add a field to the form
+                    country: "India",
                 },
                 itemsPrice: subtotal,
                 taxAmount: tax,
@@ -190,26 +192,136 @@ export default function CheckoutPage() {
                 orderNotes: formData.message,
             };
 
-            const response = await createOrder(orderData).unwrap();
+            if (paymentMethod === "online") {
+                // 1. Create order in DB with "Pending" status first
+                const pendingOrderData = {
+                    ...orderData,
+                    paymentInfo: {
+                        status: "Pending",
+                    },
+                };
 
-            setIsSubmitted(true);
-            toast.success("Order placed successfully!");
+                const dbOrderResponse = await createOrder(pendingOrderData).unwrap();
+                const dbOrderId = dbOrderResponse.order._id;
 
-            if (isBuyNow) {
-                sessionStorage.removeItem('buyNowItem');
+                // 2. Create Razorpay order
+                const res = await fetch('/api/razorpay/order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ amount: total }),
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    toast.error(data.message || "Failed to initiate payment");
+                    return;
+                }
+
+                const options = {
+                    key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+                    amount: data.amount,
+                    currency: data.currency,
+                    name: "Mr. Kitchen",
+                    description: "Order Payment",
+                    order_id: data.orderId,
+                    notes: {
+                        db_order_id: dbOrderId, // Pass DB order ID to notes for webhook
+                    },
+                    handler: async function (response: any) {
+                        try {
+                            // 3. Verify payment on server
+                            const verifyRes = await fetch('/api/razorpay/verify', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    razorpay_order_id: response.razorpay_order_id,
+                                    razorpay_payment_id: response.razorpay_payment_id,
+                                    razorpay_signature: response.razorpay_signature,
+                                }),
+                            });
+
+                            const verifyData = await verifyRes.json();
+
+                            if (verifyData.success) {
+                                // 4. Update existing order in DB to "Paid"
+                                // We can use the same createOrder mutation or a separate update mutation
+                                // For now, let's assume we can hit an endpoint to mark as paid or just use verify route
+                                
+                                // Re-using verify logic to update DB order if needed, 
+                                // OR calling another API. Let's create a completion API.
+                                await fetch(`/api/orders/${dbOrderId}/mark-paid`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ paymentId: response.razorpay_payment_id }),
+                                });
+
+                                setIsSubmitted(true);
+                                toast.success("Order placed successfully!");
+
+                                if (isBuyNow) {
+                                    sessionStorage.removeItem('buyNowItem');
+                                } else {
+                                    dispatch(clearCart());
+                                }
+
+                                setTimeout(() => {
+                                    router.push("/profile");
+                                }, 1500);
+                            } else {
+                                toast.error("Payment verification failed");
+                            }
+                        } catch (err: any) {
+                            console.error("Verification error:", err);
+                            toast.error("An error occurred during payment verification");
+                        }
+                    },
+                    prefill: {
+                        name: formData.fullName,
+                        email: formData.email,
+                        contact: formData.phone,
+                    },
+                    theme: {
+                        color: "#a87522",
+                    },
+                    modal: {
+                        ondismiss: function() {
+                            // If they dismiss, the order stays "Pending" in DB
+                        }
+                    }
+                };
+
+                const paymentObject = new (window as any).Razorpay(options);
+                paymentObject.open();
+                
+                paymentObject.on('payment.failed', function (response: any) {
+                    toast.error(response.error.description || "Payment failed");
+                });
             } else {
-                dispatch(clearCart());
-            }
 
-            // Redirect to profile page
-            setTimeout(() => {
-                router.push("/profile");
-            }, 1500);
+                // COD logic
+                await createOrder(orderData).unwrap();
+
+                setIsSubmitted(true);
+                toast.success("Order placed successfully!");
+
+                if (isBuyNow) {
+                    sessionStorage.removeItem('buyNowItem');
+                } else {
+                    dispatch(clearCart());
+                }
+
+                // Redirect to profile page
+                setTimeout(() => {
+                    router.push("/profile");
+                }, 1500);
+            }
         } catch (error: any) {
             console.error("Order creation error:", error);
             toast.error(error?.data?.message || "Failed to place order. Please try again.");
         }
     };
+
 
     if (!authLoading && !user && !userProfile) {
         return (
@@ -229,6 +341,11 @@ export default function CheckoutPage() {
 
     return (
         <div className="min-h-screen bg-black pt-20 pb-12">
+            <Script
+                src="https://checkout.razorpay.com/v1/checkout.js"
+                strategy="lazyOnload"
+            />
+
             {/* Header */}
             <div className="pb-12 text-center border-b border-white/10">
                 <h1 className="font-['Poppins'] font-medium text-[32px] md:text-[48px] text-white">
@@ -474,18 +591,20 @@ export default function CheckoutPage() {
                                                 Cash on Delivery (COD)
                                             </span>
                                         </label>
-                                        {/* <label className="flex items-center p-3 bg-black/40 border border-[#3a3027] rounded-lg cursor-pointer hover:border-[#a87522]/50 transition-colors opacity-50">
+                                        <label className="flex items-center p-3 bg-black/40 border border-[#3a3027] rounded-lg cursor-pointer hover:border-[#a87522]/50 transition-colors">
                                             <input
                                                 type="radio"
                                                 name="paymentMethod"
                                                 value="online"
-                                                disabled
+                                                checked={paymentMethod === 'online'}
+                                                onChange={(e) => setPaymentMethod(e.target.value)}
                                                 className="w-4 h-4"
                                             />
-                                            <span className="ml-3 text-gray-400 font-medium">
-                                                Online Payment (Coming Soon)
+                                            <span className="ml-3 text-white font-medium">
+                                                Online Payment (Razorpay)
                                             </span>
-                                        </label> */}
+                                        </label>
+
                                     </div>
                                 </div>
 
