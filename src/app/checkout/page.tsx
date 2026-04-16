@@ -193,22 +193,19 @@ export default function CheckoutPage() {
             };
 
             if (paymentMethod === "online") {
-                // 1. Create order in DB with "Pending" status first
-                const pendingOrderData = {
-                    ...orderData,
-                    paymentInfo: {
-                        status: "Pending",
-                    },
-                };
-
-                const dbOrderResponse = await createOrder(pendingOrderData).unwrap();
-                const dbOrderId = dbOrderResponse.order._id;
-
-                // 2. Create Razorpay order
+                // 1. Create Razorpay order + SessionStartedOrder only (no full Order yet)
+                // Real Order is created ONLY after successful payment
                 const res = await fetch('/api/razorpay/order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ amount: total }),
+                    body: JSON.stringify({
+                        amount: total,
+                        orderItems: orderData.orderItems,
+                        shippingInfo: orderData.shippingInfo,
+                        itemsPrice: subtotal,
+                        totalAmount: total,
+                        orderNotes: formData.message,
+                    }),
                 });
 
                 const data = await res.json();
@@ -225,12 +222,9 @@ export default function CheckoutPage() {
                     name: "Mr. Kitchen",
                     description: "Order Payment",
                     order_id: data.orderId,
-                    notes: {
-                        db_order_id: dbOrderId, // Pass DB order ID to notes for webhook
-                    },
                     handler: async function (response: any) {
                         try {
-                            // 3. Verify payment on server
+                            // 2. Verify payment signature
                             const verifyRes = await fetch('/api/razorpay/verify', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -244,17 +238,21 @@ export default function CheckoutPage() {
                             const verifyData = await verifyRes.json();
 
                             if (verifyData.success) {
-                                // 4. Update existing order in DB to "Paid"
-                                // We can use the same createOrder mutation or a separate update mutation
-                                // For now, let's assume we can hit an endpoint to mark as paid or just use verify route
-                                
-                                // Re-using verify logic to update DB order if needed, 
-                                // OR calling another API. Let's create a completion API.
-                                await fetch(`/api/orders/${dbOrderId}/mark-paid`, {
-                                    method: 'PATCH',
+                                // 3. Payment verified — now create the real Order
+                                await createOrder({
+                                    ...orderData,
+                                    paymentInfo: {
+                                        id: response.razorpay_payment_id,
+                                        status: "Paid",
+                                    },
+                                }).unwrap();
+
+                                // 4. Clean up SessionStartedOrder now that real Order exists
+                                fetch('/api/razorpay/cleanup', {
+                                    method: 'DELETE',
                                     headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ paymentId: response.razorpay_payment_id }),
-                                });
+                                    body: JSON.stringify({ razorpayOrderId: response.razorpay_order_id }),
+                                }).catch(() => {}); // fire-and-forget
 
                                 setIsSubmitted(true);
                                 toast.success("Order placed successfully!");
@@ -286,14 +284,19 @@ export default function CheckoutPage() {
                     },
                     modal: {
                         ondismiss: function() {
-                            // If they dismiss, the order stays "Pending" in DB
+                            toast.error("Payment cancelled.");
                         }
                     }
                 };
 
+                if (!(window as any).Razorpay) {
+                    toast.error("Payment gateway not loaded. Please refresh and try again.");
+                    return;
+                }
+
                 const paymentObject = new (window as any).Razorpay(options);
                 paymentObject.open();
-                
+
                 paymentObject.on('payment.failed', function (response: any) {
                     toast.error(response.error.description || "Payment failed");
                 });
