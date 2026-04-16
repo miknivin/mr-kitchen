@@ -38,13 +38,7 @@ export default function ProductsPage() {
                                     Limited time. Limited stock.
                                 </p>
 
-                                <motion.button
-                                    whileHover={{ scale: 1.05 }}
-                                    whileTap={{ scale: 0.95 }}
-                                    className="mt-2 px-6 py-3 bg-[#a87522] hover:bg-[#8e621d] rounded-[15px] text-white font-['Poppins'] font-semibold text-[16px] md:text-[20px] shadow-lg transition-colors"
-                                >
-                                    Get 20% Off
-                                </motion.button>
+
                             </div>
 
                             {/* Product Image */}
