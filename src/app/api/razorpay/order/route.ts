@@ -23,6 +23,9 @@ export async function POST(req: Request) {
             itemsPrice,
             totalAmount,
             orderNotes,
+            totalMRP,
+            productDiscount,
+            shippingDiscount,
         } = await req.json();
 
         if (!amount) {
@@ -69,6 +72,9 @@ export async function POST(req: Request) {
                     })),
                     itemsPrice: itemsPrice || amount,
                     totalAmount: totalAmount || amount,
+                    totalMRP: totalMRP,
+                    productDiscount: productDiscount,
+                    shippingDiscount: shippingDiscount,
                     orderNotes: orderNotes || "",
                 });
             } catch (sessionErr: any) {

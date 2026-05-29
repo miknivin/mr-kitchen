@@ -266,26 +266,42 @@ export default function OrderDetailsPage() {
                                         {paymentStatus}
                                     </span>
                                 </div>
+                                {order.totalMRP != null && (
+                                    <div className="flex justify-between text-white/60">
+                                        <span>Actual Price (MRP)</span>
+                                        <span className="text-white">₹{Number(order.totalMRP).toFixed(2)}</span>
+                                    </div>
+                                )}
                                 {order.itemsPrice != null && (
                                     <div className="flex justify-between text-white/60">
-                                        <span>Subtotal</span>
+                                        <span>Discount Price</span>
                                         <span className="text-white">₹{Number(order.itemsPrice).toFixed(2)}</span>
                                     </div>
                                 )}
-                                {order.shippingAmount != null && (
+                                {order.productDiscount != null && order.productDiscount > 0 && (
                                     <div className="flex justify-between text-white/60">
-                                        <span>Shipping</span>
-                                        <span className="text-white">{Number(order.shippingAmount) === 0 ? 'FREE' : `₹${Number(order.shippingAmount).toFixed(2)}`}</span>
+                                        <span>You Saved</span>
+                                        <span className="text-green-400">- ₹{Number(order.productDiscount).toFixed(2)}</span>
                                     </div>
                                 )}
-                                {order.taxAmount != null && (
-                                    <div className="flex justify-between text-white/60">
-                                        <span>Tax</span>
-                                        <span className="text-white">₹{Number(order.taxAmount).toFixed(2)}</span>
-                                    </div>
+                                {order.shippingDiscount != null && order.shippingDiscount > 0 && (
+                                    <>
+                                        <div className="flex justify-between text-white/60">
+                                            <span>Shipping Fee</span>
+                                            <span className="text-white">+ ₹{Number(order.shippingDiscount).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-white/60">
+                                            <span>Subtotal</span>
+                                            <span className="text-white">₹{(Number(order.itemsPrice) + Number(order.shippingDiscount)).toFixed(2)}</span>
+                                        </div>
+                                        <div className="flex justify-between text-white/60">
+                                            <span>Shipping Discount</span>
+                                            <span className="text-green-400">- ₹{Number(order.shippingDiscount).toFixed(2)}</span>
+                                        </div>
+                                    </>
                                 )}
                                 <div className="flex justify-between items-center pt-2 border-t border-white/10">
-                                    <span className="text-white font-bold text-base">Total</span>
+                                    <span className="text-white font-bold text-base">Final Payable Amount</span>
                                     <span className="text-[#a87522] font-bold text-xl">₹{Number(order.totalAmount).toFixed(2)}</span>
                                 </div>
                             </div>

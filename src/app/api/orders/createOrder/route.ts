@@ -21,6 +21,9 @@ export async function POST(req: Request) {
             couponApplied,
             couponDiscount,
             orderNotes,
+            totalMRP,
+            productDiscount,
+            shippingDiscount,
         } = await req.json();
 
         const order = await Order.create({
@@ -35,6 +38,9 @@ export async function POST(req: Request) {
             couponApplied,
             couponDiscount,
             orderNotes,
+            totalMRP,
+            productDiscount,
+            shippingDiscount,
             user: user._id,
         });
 

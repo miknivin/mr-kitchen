@@ -19,10 +19,13 @@ export default function CartPage() {
     const { openAuthModal } = useAuthModal();
     const { data: user, isLoading } = useGetMeQuery(undefined);
 
-    const subtotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-    const shippingCost = subtotal > 600 ? 50 : 0;
-    const tax = 0;
-    const total = subtotal + shippingCost + tax;
+    const discountedTotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    const actualTotal = cartItems.reduce((total, item) => total + (item.originalPrice || item.price) * item.quantity, 0);
+    const youSaved = actualTotal - discountedTotal;
+    const shippingFee = 80;
+    const subtotalWithShipping = discountedTotal + shippingFee;
+    const shippingDiscount = 80;
+    const total = discountedTotal;
 
     const handleRemoveItem = (itemId: string, size?: string) => {
         dispatch(removeFromCart({ id: itemId, size }));
@@ -40,6 +43,7 @@ export default function CartPage() {
             toast.error('Please sign in to proceed');
             openAuthModal('/checkout');
         } else if (user) {
+            sessionStorage.removeItem('buyNowItem');
             router.push('/checkout');
         }
     };
@@ -174,26 +178,36 @@ export default function CartPage() {
 
                             <div className="space-y-4 mb-6">
                                 <div className="flex justify-between text-gray-300">
-                                    <span>Subtotal</span>
-                                    <span>₹{subtotal.toFixed(2)}</span>
+                                    <span>Actual Price (MRP)</span>
+                                    <span>₹{actualTotal.toFixed(2)}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-300">
-                                    <span>Delivery Charge (COD)</span>
-                                    <span className={shippingCost === 0 ? 'text-green-400 font-medium' : 'text-[#a87522]'}>
-                                        {shippingCost === 0 ? 'FREE' : `₹${shippingCost.toFixed(2)}`}
-                                    </span>
+                                    <span>Discount Price</span>
+                                    <span>₹{discountedTotal.toFixed(2)}</span>
+                                </div>
+                                {youSaved > 0 && (
+                                    <div className="flex justify-between text-green-400">
+                                        <span>You Saved</span>
+                                        <span>- ₹{youSaved.toFixed(2)}</span>
+                                    </div>
+                                )}
+                                <div className="flex justify-between text-gray-300">
+                                    <span>Shipping Fee</span>
+                                    <span>+ ₹{shippingFee.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-gray-300">
+                                    <span>Subtotal</span>
+                                    <span>₹{subtotalWithShipping.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-green-400">
+                                    <span>Shipping Discount</span>
+                                    <span>- ₹{shippingDiscount.toFixed(2)}</span>
                                 </div>
                                 <div className="border-t border-[#3a3027] pt-4 flex justify-between font-['Poppins'] font-bold text-white text-lg">
-                                    <span>Total</span>
+                                    <span>Final Payable Amount</span>
                                     <span className="text-[#a87522]">₹{total.toFixed(2)}</span>
                                 </div>
                             </div>
-
-                            {subtotal > 600 && (
-                                <p className="text-[#a87522] text-xs mb-4 p-2 bg-[#a87522]/10 rounded border border-[#a87522]/20">
-                                    Note: ₹50 charge applies for COD orders above ₹600.
-                                </p>
-                            )}
 
                             <motion.button
                                 onClick={handleCheckout}

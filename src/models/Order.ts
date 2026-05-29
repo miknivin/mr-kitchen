@@ -31,6 +31,9 @@ export interface IOrder extends Document {
     taxAmount: number;
     shippingAmount: number;
     totalAmount: number;
+    totalMRP?: number;
+    productDiscount?: number;
+    shippingDiscount?: number;
     couponApplied?: string;
     couponDiscount?: number;
     orderStatus: string;
@@ -95,6 +98,9 @@ const OrderSchema = new Schema<IOrder>(
         taxAmount: { type: Number, required: true, default: 0 },
         shippingAmount: { type: Number, required: true, default: 0 },
         totalAmount: { type: Number, required: true },
+        totalMRP: { type: Number, required: false },
+        productDiscount: { type: Number, required: false },
+        shippingDiscount: { type: Number, required: false },
         couponApplied: { type: String, default: "No" },
         couponDiscount: { type: Number, default: 0 },
         orderStatus: {

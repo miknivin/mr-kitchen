@@ -105,11 +105,16 @@ export default function CheckoutPage() {
     }, [isMounted, isItemsLoaded, checkoutItems.length, router, isLoading, authLoading, userProfile, user, openAuthModal]);
 
     // Calculate totals
-    const subtotal = checkoutItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const codCharge = (paymentMethod === 'cod' && subtotal > 600) ? 50 : 0;
-    const shippingCost = codCharge;
+    const discountedTotal = checkoutItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const actualTotal = checkoutItems.reduce((acc, item) => acc + (item.originalPrice || item.price) * item.quantity, 0);
+    const youSaved = actualTotal - discountedTotal;
+    const shippingFee = 80;
+    const subtotalWithShipping = discountedTotal + shippingFee;
+    const shippingDiscount = 80;
+    const shippingCost = 0;
     const tax = 0;
-    const total = subtotal + shippingCost + tax;
+    const total = discountedTotal;
+    const subtotal = discountedTotal;
 
     // Form validation
     const validateForm = () => {
@@ -184,10 +189,13 @@ export default function CheckoutPage() {
                     zipCode: formData.postalCode,
                     country: "India",
                 },
-                itemsPrice: subtotal,
+                itemsPrice: discountedTotal,
                 taxAmount: tax,
                 shippingAmount: shippingCost,
                 totalAmount: total,
+                totalMRP: actualTotal,
+                productDiscount: youSaved,
+                shippingDiscount: shippingDiscount,
                 paymentMethod: paymentMethod === "cod" ? "COD" : "Online",
                 orderNotes: formData.message,
             };
@@ -202,8 +210,11 @@ export default function CheckoutPage() {
                         amount: total,
                         orderItems: orderData.orderItems,
                         shippingInfo: orderData.shippingInfo,
-                        itemsPrice: subtotal,
+                        itemsPrice: discountedTotal,
                         totalAmount: total,
+                        totalMRP: actualTotal,
+                        productDiscount: youSaved,
+                        shippingDiscount: shippingDiscount,
                         orderNotes: formData.message,
                     }),
                 });
@@ -645,19 +656,35 @@ export default function CheckoutPage() {
 
                             <div className="space-y-4 mb-6 pb-6 border-b border-[#3a3027]">
                                 <div className="flex justify-between text-gray-300">
-                                    <span>Subtotal</span>
-                                    <span>₹{subtotal.toFixed(2)}</span>
+                                    <span>Actual Price (MRP)</span>
+                                    <span>₹{actualTotal.toFixed(2)}</span>
                                 </div>
-                                {shippingCost > 0 && (
-                                    <div className="flex justify-between text-gray-300">
-                                        <span>Delivery Charge (COD)</span>
-                                        <span>₹{shippingCost.toFixed(2)}</span>
+                                <div className="flex justify-between text-gray-300">
+                                    <span>Discount Price</span>
+                                    <span>₹{discountedTotal.toFixed(2)}</span>
+                                </div>
+                                {youSaved > 0 && (
+                                    <div className="flex justify-between text-green-400">
+                                        <span>You Saved</span>
+                                        <span>- ₹{youSaved.toFixed(2)}</span>
                                     </div>
                                 )}
+                                <div className="flex justify-between text-gray-300">
+                                    <span>Shipping Fee</span>
+                                    <span>+ ₹{shippingFee.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-gray-300">
+                                    <span>Subtotal</span>
+                                    <span>₹{subtotalWithShipping.toFixed(2)}</span>
+                                </div>
+                                <div className="flex justify-between text-green-400">
+                                    <span>Shipping Discount</span>
+                                    <span>- ₹{shippingDiscount.toFixed(2)}</span>
+                                </div>
                             </div>
 
                             <div className="flex justify-between items-center mb-6">
-                                <span className="text-white font-semibold text-lg">Total:</span>
+                                <span className="text-white font-semibold text-lg">Final Payable Amount:</span>
                                 <span className="text-[#a87522] font-bold text-2xl">
                                     ₹{total.toFixed(2)}
                                 </span>
@@ -673,15 +700,8 @@ export default function CheckoutPage() {
                                 </div>
                                 <div>
                                     <p className="text-gray-400">Delivery</p>
-                                    <p className="text-white font-medium">
-                                        {shippingCost > 0 ? 'COD Charge Applied' : 'Standard Delivery'}
-                                    </p>
+                                    <p className="text-green-400 font-medium">Free Shipping</p>
                                 </div>
-                                {subtotal > 600 && paymentMethod === 'cod' && (
-                                    <p className="text-[#a87522] text-xs pt-2 border-t border-[#3a3027]">
-                                        ₹50 COD charge added for orders above ₹600.
-                                    </p>
-                                )}
                             </div>
                         </div>
                     </motion.div>
