@@ -261,12 +261,20 @@ export default function ProductDetailsPage() {
                                     <p className="font-['Poppins'] font-bold text-[32px] text-[#a87522]">
                                         ₹{(selectedVariant
                                             ? (selectedVariant.discountPrice > 0 ? selectedVariant.discountPrice : selectedVariant.price)
-                                            : (typeof product.price === 'number' ? product.price : 0)).toFixed(2)}
+                                            : (product.discountPrice > 0 ? product.discountPrice : (typeof product.price === 'number' ? product.price : 0))).toFixed(2)}
                                     </p>
-                                    {selectedVariant?.discountPrice > 0 && selectedVariant.price > selectedVariant.discountPrice && (
-                                        <p className="text-gray-500 line-through text-lg font-['Poppins']">
-                                            ₹{selectedVariant.price.toFixed(2)}
-                                        </p>
+                                    {((selectedVariant?.discountPrice > 0 && selectedVariant.price > selectedVariant.discountPrice) ||
+                                      (!selectedVariant && product.discountPrice > 0 && product.price > product.discountPrice)) && (
+                                        <>
+                                            <p className="text-gray-500 line-through text-lg font-['Poppins']">
+                                                ₹{(selectedVariant ? selectedVariant.price : product.price).toFixed(2)}
+                                            </p>
+                                            <span className="bg-[#a87522]/10 border border-[#a87522]/30 text-[#a87522] text-xs md:text-sm font-['Poppins'] font-bold px-2.5 py-0.5 rounded-md ml-1">
+                                                {selectedVariant
+                                                    ? Math.round(((selectedVariant.price - selectedVariant.discountPrice) / selectedVariant.price) * 100)
+                                                    : Math.round(((product.price - product.discountPrice) / product.price) * 100)}% OFF
+                                            </span>
+                                        </>
                                     )}
                                 </div>
                             </div>

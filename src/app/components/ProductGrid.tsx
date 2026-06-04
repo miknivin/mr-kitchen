@@ -44,12 +44,23 @@ const ProductCard = ({ product }: { product: Product }) => {
     ? Math.min(...product.variants.map(v => v.price))
     : null;
 
+  const discountPercentage = originalPrice && originalPrice > displayPrice
+    ? Math.round(((originalPrice - displayPrice) / originalPrice) * 100)
+    : 0;
+
   return (
     <Link href={`/products/${product._id}`}>
       <motion.div
         whileHover={{ y: -5 }}
-        className="flex flex-col items-center text-center w-full max-w-[280px] md:max-w-[280px] mx-auto p-4 md:p-5 rounded-[20px] bg-black shadow-2xl transition-all duration-300 cursor-pointer h-full border border-[#a87522]/30"
+        className="relative flex flex-col items-center text-center w-full max-w-[280px] md:max-w-[280px] mx-auto p-4 md:p-5 rounded-[20px] bg-black shadow-2xl transition-all duration-300 cursor-pointer h-full border border-[#a87522]/30"
       >
+        {/* Discount Badge */}
+        {discountPercentage > 0 && (
+          <div className="absolute top-3 left-3 bg-gradient-to-r from-[#a87522] to-[#8e621d] text-white font-['Poppins'] font-bold text-[11px] md:text-[12px] px-2.5 py-0.5 rounded-full z-20 shadow-md">
+            {discountPercentage}% OFF
+          </div>
+        )}
+
         {/* Product Image */}
         <div className="h-[160px] md:h-[180px] flex items-center justify-center mb-2 relative group w-full">
           {product.images && product.images[0] ? (

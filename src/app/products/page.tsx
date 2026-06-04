@@ -32,7 +32,7 @@ export default function ProductsPage() {
                                 </h2>
                                 <div className="font-['Poppins'] text-[18px] md:text-[22px] lg:text-[24px] text-black/80 leading-snug">
                                     <p>Get Mr. Kitchen Charcoal Dishwash Gel</p>
-                                    <p className="font-bold">at 20% OFF</p>
+                                    <p className="font-bold">at 23% OFF</p>
                                 </div>
                                 <p className="font-['Poppins'] text-[14px] md:text-[18px] text-black/60">
                                     Limited time. Limited stock.
