@@ -115,7 +115,19 @@ const ProductCard = ({ product }: { product: Product }) => {
 
 export const ProductGrid = () => {
     const { data, isLoading, error } = useGetProductsQuery({});
-    const products = data?.products || [];
+
+    // HIDE_2L_VARIANT: Filter out 2L products temporarily from the listing.
+    // To re-enable 2L products, remove this filter block.
+    const is2LProduct = (product: Product) => {
+        const name = (product.name || '').toLowerCase();
+        const nameHas2L = name.includes('2ltr') || name.includes('2 ltr') || name.includes('2litre') || name.includes('2 litre') || name.includes('2liter') || name.includes('2 liter') || /\b2l\b/.test(name);
+        const allVariants2L = (product.variants || []).length > 0 && (product.variants || []).every((v) => {
+            const size = (v.size || '').trim().toLowerCase();
+            return size === '2l' || size === '2 l' || size === '2litre' || size === '2 litre' || size === '2liter' || size === '2 liter' || size === '2ltr' || size === '2 ltr';
+        });
+        return nameHas2L || allVariants2L;
+    };
+    const products = (data?.products || []).filter((p: Product) => !is2LProduct(p));
 
     const [emblaRef, emblaApi] = useEmblaCarousel({ loop: false, align: 'start', containScroll: 'trimSnaps' });
     const [selectedIndex, setSelectedIndex] = useState(0);

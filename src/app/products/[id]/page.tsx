@@ -28,7 +28,12 @@ export default function ProductDetailsPage() {
     // Auto-select the first variant when product changes
     useEffect(() => {
         if (product && product.variants && product.variants.length > 0) {
-            setSelectedVariant(product.variants[0]);
+            // HIDE_2L_VARIANT: Filter out 2L variant temporarily (remove this filter to re-enable 2L)
+            const visibleVariants = product.variants.filter((v: any) => {
+                const size = (v.size || '').trim().toLowerCase();
+                return size !== '2l' && size !== '2 l' && size !== '2 litre' && size !== '2 litres' && size !== '2 liter' && size !== '2 liters' && size !== '2ltr' && size !== '2 ltr';
+            });
+            setSelectedVariant(visibleVariants.length > 0 ? visibleVariants[0] : null);
         } else {
             setSelectedVariant(null);
         }
@@ -292,7 +297,11 @@ export default function ProductDetailsPage() {
                                         transition={{ duration: 0.4 }}
                                         className="flex flex-wrap gap-3"
                                     >
-                                        {product.variants.map((variant: any, index: number) => (
+                                        {/* HIDE_2L_VARIANT: Filter removes 2L temporarily. Remove the .filter() call below to re-enable 2L variant */}
+                                        {product.variants.filter((v: any) => {
+                                            const size = (v.size || '').trim().toLowerCase();
+                                            return size !== '2l' && size !== '2 l' && size !== '2 litre' && size !== '2 litres' && size !== '2 liter' && size !== '2 liters' && size !== '2ltr' && size !== '2 ltr';
+                                        }).map((variant: any, index: number) => (
                                             <button
                                                 key={index}
                                                 onClick={() => { setSelectedVariant(variant); setVariantError(false); }}
